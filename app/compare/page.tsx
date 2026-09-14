@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 const priorityOptions = [
   "Price",
@@ -14,6 +15,8 @@ const priorityOptions = [
 ];
 
 export default function ComparePage() {
+  const router = useRouter();
+
   const [options, setOptions] = useState(["", ""]);
   const [context, setContext] = useState("");
   {/* Step 03 */}
@@ -102,7 +105,22 @@ const addCustomPriority = () => {
 
   const canCompare =
     options.length >= 2 && options.every((option) => option.trim() !== "");
+  const handleVerdict = () => {
+  if (!canCompare) return;
 
+  const comparisonData = {
+    options,
+    priorities: selectedPriorities,
+    context,
+  };
+
+  sessionStorage.setItem(
+    "verdictComparison",
+    JSON.stringify(comparisonData)
+  );
+
+  router.push("/compare/results");
+};
   return (
     <main className="min-h-screen bg-[#F7F5EF] text-[#101828]">
       {/* Navigation */}
@@ -323,6 +341,7 @@ const addCustomPriority = () => {
         <div className="mt-14 flex justify-center">
           <button
             disabled={!canCompare}
+            onClick={handleVerdict}
             className="rounded-full bg-[#244B74] px-10 py-4 font-[family-name:var(--font-manrope)] text-sm font-bold text-white shadow-lg transition hover:bg-[#193653] disabled:cursor-not-allowed disabled:opacity-40"
           >
             Get my verdict →
