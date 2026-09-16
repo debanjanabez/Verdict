@@ -19,6 +19,7 @@ export default function ComparePage() {
 
   const [options, setOptions] = useState(["", ""]);
   const [context, setContext] = useState("");
+  const [isResearching, setIsResearching] = useState(false);
   {/* Step 03 */}
 <section className="mt-12">
   <div className="mb-6">
@@ -105,8 +106,10 @@ const addCustomPriority = () => {
 
   const canCompare =
     options.length >= 2 && options.every((option) => option.trim() !== "");
-  const handleVerdict = () => {
+  const handleVerdict = async () => {
   if (!canCompare) return;
+
+  setIsResearching(true);
 
   const comparisonData = {
     options,
@@ -119,7 +122,32 @@ const addCustomPriority = () => {
     JSON.stringify(comparisonData)
   );
 
-  router.push("/compare/results");
+  try {
+    const response = await fetch("/api/research", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(comparisonData),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || "Research failed");
+    }
+
+    sessionStorage.setItem(
+      "verdictResearch",
+      result.result
+    );
+
+    router.push("/compare/results");
+  } catch (error) {
+    console.error(error);
+    setIsResearching(false);
+    alert("Something went wrong while researching. Please try again.");
+  }
 };
   return (
     <main className="min-h-screen bg-[#F7F5EF] text-[#101828]">
@@ -340,12 +368,12 @@ const addCustomPriority = () => {
         {/* Compare button */}
         <div className="mt-14 flex justify-center">
           <button
-            disabled={!canCompare}
-            onClick={handleVerdict}
-            className="rounded-full bg-[#244B74] px-10 py-4 font-[family-name:var(--font-manrope)] text-sm font-bold text-white shadow-lg transition hover:bg-[#193653] disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            Get my verdict →
-          </button>
+  disabled={!canCompare || isResearching}
+  onClick={handleVerdict}
+  className="rounded-full bg-[#244B74] px-10 py-4 font-[family-name:var(--font-manrope)] text-sm font-bold text-white shadow-lg transition hover:bg-[#193653] disabled:cursor-not-allowed disabled:opacity-40"
+>
+  {isResearching ? "Researching the web..." : "Get my verdict →"}
+</button>
         </div>
 
         {!canCompare && (
