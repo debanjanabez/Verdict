@@ -10,14 +10,20 @@ type ComparisonData = {
 
 export default function ResultsPage() {
   const [data, setData] = useState<ComparisonData | null>(null);
+  const [research, setResearch] = useState("");
 
   useEffect(() => {
-    const savedData = sessionStorage.getItem("verdictComparison");
+  const savedData = sessionStorage.getItem("verdictComparison");
+  const savedResearch = sessionStorage.getItem("verdictResearch");
 
-    if (savedData) {
-      setData(JSON.parse(savedData));
-    }
-  }, []);
+  if (savedData) {
+    setData(JSON.parse(savedData));
+  }
+
+  if (savedResearch) {
+    setResearch(savedResearch);
+  }
+}, []);
 
   if (!data) {
     return (
@@ -40,11 +46,13 @@ export default function ResultsPage() {
         </p>
 
         <h1 className="mt-3 font-[family-name:var(--font-dm-serif)] text-5xl text-[#101828]">
-          Researching your options.
+          {research ? "Your research is ready." : "Researching your options."}
         </h1>
 
         <p className="mt-4 max-w-2xl text-lg text-[#667085]">
-          VERDICT has everything it needs to compare your choices.
+          {research
+  ? "Here’s what the research found based on your priorities and context."
+  : "VERDICT has everything it needs to compare your choices."}
         </p>
 
         <div className="mt-12 rounded-2xl border border-[#E4E1D9] bg-white p-8 shadow-sm">
@@ -99,7 +107,19 @@ export default function ResultsPage() {
             </div>
           )}
 
-        </div>
+                </div>
+
+        {research && (
+          <div className="mt-8 rounded-2xl border border-[#E4E1D9] bg-white p-8 shadow-sm">
+            <p className="text-xs font-semibold tracking-[0.18em] text-[#244B74]">
+              AI RESEARCH
+            </p>
+
+            <div className="mt-6 whitespace-pre-wrap font-[family-name:var(--font-manrope)] text-sm leading-7 text-[#344054]">
+              {research}
+            </div>
+          </div>
+        )}
 
         <div className="mt-8 text-center">
           <p className="text-sm text-[#667085]">
