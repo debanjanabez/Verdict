@@ -1,36 +1,84 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# VERDICT
 
-## Getting Started
+### Research. Compare. Decide.
 
-First, run the development server:
+VERDICT is an AI-powered comparison platform designed to help people make better-informed decisions.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Instead of relying on scattered searches, reviews, and comparison websites, VERDICT brings the research process into one place. Users can enter multiple options, specify what matters to them, add personal context, and receive an AI-generated comparison based on current web research.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## ✨ WHAT VEDICT DOES:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+VERDICT allows users to:
 
-## Learn More
+- Compare multiple options side by side
+- Add up to 8 options to a comparison
+- Define personal priorities such as:
+  - Price
+  - Performance
+  - Quality
+  - Features
+  - Reviews
+  - Durability
+  - Battery
+  - Portability
+- Add custom comparison criteria
+- Provide additional personal context
+- Use AI to research options using current web information
+- Generate an AI-powered comparison and verdict
 
-To learn more about Next.js, take a look at the following resources:
+The goal is simple:
+ **Research less. Understand more. Decide with confidence.**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## HOW IT WORKS
 
-## Deploy on Vercel
+```text
+User enters options
+        ↓
+User selects priorities
+        ↓
+User adds personal context
+        ↓
+VERDICT sends the comparison to the AI
+        ↓
+AI researches the web
+        ↓
+Relevant information is analyzed
+        ↓
+Options are compared according to user priorities
+        ↓
+VERDICT generates the result
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## CURRENT FEATURES
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Multi-option comparison** — Compare 2–8 options in a single decision.
+- **Personalized priorities** — Choose factors such as price, performance, quality, battery, or add your own.
+- **Personal context** — Tell VERDICT about your situation so the research can be tailored to your needs.
+- **AI-powered web research** — Research options using current information from the web.
+- **AI-generated verdict** — Get a structured comparison covering key differences, trade-offs, and a final verdict.
+- **Source-backed research** — View the sources used during the research process.
+
+## PROJECT STRUCTURE
+verdict/
+│
+├── app/
+│   ├── api/
+│   │   └── research/
+│   │       └── route.ts
+│   │
+│   ├── compare/
+│   │   ├── page.tsx
+│   │   └── results/
+│   │       └── page.tsx
+│   │
+│   ├── layout.tsx
+│   └── page.tsx
+│
+├── public/
+│
+├── .env.local
+├── .gitignore
+├── package.json
+├── next.config.ts
+└── README.md
