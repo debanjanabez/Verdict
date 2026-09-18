@@ -20,48 +20,7 @@ export default function ComparePage() {
   const [options, setOptions] = useState(["", ""]);
   const [context, setContext] = useState("");
   const [isResearching, setIsResearching] = useState(false);
-  {/* Step 03 */}
-<section className="mt-12">
-  <div className="mb-6">
-    <p className="text-sm font-semibold tracking-[0.18em] text-[#244B74]">
-      03
-    </p>
-    <h2 className="mt-2 font-serif text-3xl text-[#101828]">
-      Add some context.
-    </h2>
-    <p className="mt-2 max-w-2xl text-[#667085]">
-      Tell us anything about your situation that could affect the verdict.
-    </p>
-  </div>
-
-  <div className="rounded-2xl border border-[#E4E1D9] bg-white p-6 shadow-sm">
-    <textarea
-      value={context}
-      onChange={(e) => setContext(e.target.value)}
-      placeholder="For example: I'm a college student and I care more about battery life and portability than gaming performance..."
-      rows={5}
-      className="w-full resize-none rounded-xl border border-[#E4E1D9] bg-[#F7F5EF] p-4 text-sm text-[#101828] outline-none transition placeholder:text-[#98A2B3] focus:border-[#244B74]"
-    />
-
-    <div className="mt-4 flex flex-wrap gap-2">
-      {[
-        "My budget is limited",
-        "I'm a student",
-        "I travel frequently",
-        "I value long-term use",
-      ].map((example) => (
-        <button
-          key={example}
-          type="button"
-          onClick={() => setContext(example)}
-          className="rounded-full border border-[#E4E1D9] px-4 py-2 text-sm text-[#667085] transition hover:border-[#244B74] hover:text-[#244B74]"
-        >
-          {example}
-        </button>
-      ))}
-    </div>
-  </div>
-</section>
+ 
   const [selectedPriorities, setSelectedPriorities] = useState<string[]>([
   "Performance",
   "Price",
