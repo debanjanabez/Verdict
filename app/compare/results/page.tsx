@@ -108,7 +108,19 @@ export default function ResultsPage() {
           )}
 
                 </div>
+        <div className="mt-8 rounded-2xl border border-[#D9B56D] bg-white p-8 shadow-sm">
+  <p className="text-xs font-semibold tracking-[0.18em] text-[#244B74]">
+    VERDICT
+  </p>
 
+  <h2 className="mt-3 font-[family-name:var(--font-dm-serif)] text-3xl text-[#101828]">
+    Your decision is being researched.
+  </h2>
+
+  <p className="mt-3 max-w-2xl text-sm leading-6 text-[#667085]">
+    VERDICT is analyzing your options against the priorities and context you provided.
+  </p>
+</div>
         {research && (
           <div className="mt-8 rounded-2xl border border-[#E4E1D9] bg-white p-8 shadow-sm">
             <p className="text-xs font-semibold tracking-[0.18em] text-[#244B74]">
@@ -120,12 +132,6 @@ export default function ResultsPage() {
             </div>
           </div>
         )}
-
-        <div className="mt-8 text-center">
-          <p className="text-sm text-[#667085]">
-            The next step is connecting VERDICT to real-time AI research.
-          </p>
-        </div>
 
       </div>
     </main>

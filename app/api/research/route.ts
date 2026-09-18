@@ -73,14 +73,15 @@ Be concise but useful. The goal is to help the user make a well-informed decisio
 `;
 
     const response = await openai.responses.create({
-      model: "gpt-5.6-luna",
-      tools: [
-        {
-          type: "web_search",
-        },
-      ],
-      input: prompt,
-    });
+  model: "gpt-5.6-luna",
+  tools: [
+    {
+      type: "web_search",
+    },
+  ],
+  input: prompt,
+  max_output_tokens: 2500,
+});
 
     return NextResponse.json({
       result: response.output_text,
