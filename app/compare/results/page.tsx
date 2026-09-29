@@ -13,125 +13,260 @@ export default function ResultsPage() {
   const [research, setResearch] = useState("");
 
   useEffect(() => {
-  const savedData = sessionStorage.getItem("verdictComparison");
-  const savedResearch = sessionStorage.getItem("verdictResearch");
+    const savedData = sessionStorage.getItem("verdictComparison");
+    const savedResearch = sessionStorage.getItem("verdictResearch");
 
-  if (savedData) {
-    setData(JSON.parse(savedData));
-  }
+    if (savedData) {
+      setData(JSON.parse(savedData));
+    }
 
-  if (savedResearch) {
-    setResearch(savedResearch);
-  }
-}, []);
+    if (savedResearch) {
+      setResearch(savedResearch);
+    }
+  }, []);
 
   if (!data) {
     return (
       <main className="min-h-screen bg-[#F7F5EF] px-6 py-20">
         <div className="mx-auto max-w-4xl text-center">
-          <p className="text-[#667085]">
-            No comparison found.
-          </p>
+          <p className="text-[#667085]">No comparison found.</p>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#F7F5EF] px-6 py-20">
-      <div className="mx-auto max-w-4xl">
+    <main className="min-h-screen bg-[#F7F5EF] px-6 py-16">
+      <div className="mx-auto max-w-5xl">
 
-        <p className="text-sm font-semibold tracking-[0.18em] text-[#244B74]">
-          YOUR VERDICT
-        </p>
+        {/* Header */}
+        <div className="mb-12">
+          <p className="text-sm font-bold tracking-[0.2em] text-[#244B74]">
+            YOUR VERDICT
+          </p>
 
-        <h1 className="mt-3 font-[family-name:var(--font-dm-serif)] text-5xl text-[#101828]">
-          {research ? "Your research is ready." : "Researching your options."}
-        </h1>
+          <h1 className="mt-3 font-[family-name:var(--font-dm-serif)] text-5xl leading-tight text-[#101828] md:text-6xl">
+            Your decision is ready.
+          </h1>
 
-        <p className="mt-4 max-w-2xl text-lg text-[#667085]">
-          {research
-  ? "Here’s what the research found based on your priorities and context."
-  : "VERDICT has everything it needs to compare your choices."}
-        </p>
+          <p className="mt-4 max-w-2xl text-lg leading-8 text-[#667085]">
+            VERDICT analyzed your options against the priorities and context
+            you provided.
+          </p>
+        </div>
 
-        <div className="mt-12 rounded-2xl border border-[#E4E1D9] bg-white p-8 shadow-sm">
+        {/* Verdict card */}
+        <section className="rounded-3xl border border-[#D9B56D] bg-white p-8 shadow-sm md:p-10">
+          <div className="flex items-start justify-between gap-6">
+            <div>
+              <p className="text-xs font-bold tracking-[0.2em] text-[#244B74]">
+                VERDICT
+              </p>
 
-          <h2 className="font-[family-name:var(--font-dm-serif)] text-2xl text-[#101828]">
-            Your comparison
-          </h2>
+              <h2 className="mt-3 font-[family-name:var(--font-dm-serif)] text-3xl text-[#101828]">
+                Your options have been analyzed.
+              </h2>
 
-          <div className="mt-6 space-y-3">
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-[#667085]">
+                This demo currently uses simulated research. Once the live
+                research engine is connected, this section will contain a
+                recommendation backed by current web research.
+              </p>
+            </div>
+
+            <div className="hidden h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#F7F5EF] text-2xl md:flex">
+              ✓
+            </div>
+          </div>
+        </section>
+
+        {/* Options */}
+        <section className="mt-8">
+          <div className="mb-5">
+            <p className="text-xs font-bold tracking-[0.18em] text-[#244B74]">
+              01
+            </p>
+
+            <h2 className="mt-2 font-[family-name:var(--font-dm-serif)] text-3xl text-[#101828]">
+              Your comparison
+            </h2>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
             {data.options.map((option, index) => (
               <div
                 key={index}
-                className="rounded-xl bg-[#F7F5EF] px-5 py-4"
+                className="rounded-2xl border border-[#E4E1D9] bg-white p-6 shadow-sm transition hover:-translate-y-0.5"
               >
-                <p className="text-xs font-semibold tracking-wider text-[#667085]">
-                  OPTION {index + 1}
+                <p className="text-xs font-bold tracking-[0.16em] text-[#667085]">
+                  OPTION {String(index + 1).padStart(2, "0")}
                 </p>
 
-                <p className="mt-1 text-lg font-medium text-[#101828]">
+                <h3 className="mt-3 font-[family-name:var(--font-dm-serif)] text-2xl text-[#101828]">
                   {option}
+                </h3>
+
+                <p className="mt-3 text-sm leading-6 text-[#667085]">
+                  Evaluated against your selected priorities and context.
                 </p>
               </div>
             ))}
           </div>
+        </section>
 
-          <div className="mt-8">
-            <p className="text-sm font-semibold text-[#101828]">
-              Your priorities
+        {/* Comparison at a glance */}
+        <section className="mt-12">
+          <div className="mb-5">
+            <p className="text-xs font-bold tracking-[0.18em] text-[#244B74]">
+              02
             </p>
 
-            <div className="mt-3 flex flex-wrap gap-2">
-              {data.priorities.map((priority) => (
-                <span
-                  key={priority}
-                  className="rounded-full bg-[#F1F0EA] px-4 py-2 text-sm text-[#244B74]"
+            <h2 className="mt-2 font-[family-name:var(--font-dm-serif)] text-3xl text-[#101828]">
+              Comparison at a glance
+            </h2>
+
+            <p className="mt-3 text-sm leading-6 text-[#667085]">
+              A structured view of the criteria that matter to you.
+            </p>
+          </div>
+
+          <div className="overflow-hidden rounded-3xl border border-[#E4E1D9] bg-white shadow-sm">
+            {/* Table header */}
+            <div
+              className="grid gap-4 border-b border-[#E4E1D9] bg-[#F7F5EF] px-6 py-5"
+              style={{
+                gridTemplateColumns: `1.4fr repeat(${data.options.length}, 1fr)`,
+              }}
+            >
+              <p className="text-xs font-bold tracking-[0.12em] text-[#667085]">
+                CRITERIA
+              </p>
+
+              {data.options.map((option, index) => (
+                <p
+                  key={index}
+                  className="truncate text-sm font-bold text-[#101828]"
                 >
-                  {priority}
-                </span>
+                  {option}
+                </p>
               ))}
             </div>
+
+            {/* Priority rows */}
+            {data.priorities.map((priority) => (
+              <div
+                key={priority}
+                className="grid gap-4 border-b border-[#E4E1D9] px-6 py-5 last:border-b-0"
+                style={{
+                  gridTemplateColumns: `1.4fr repeat(${data.options.length}, 1fr)`,
+                }}
+              >
+                <p className="text-sm font-semibold text-[#101828]">
+                  {priority}
+                </p>
+
+                {data.options.map((option, index) => (
+                  <p
+                    key={`${priority}-${index}`}
+                    className="text-sm leading-6 text-[#667085]"
+                  >
+                    Demo analysis
+                  </p>
+                ))}
+              </div>
+            ))}
           </div>
 
-          {data.context && (
-            <div className="mt-8">
-              <p className="text-sm font-semibold text-[#101828]">
-                Your context
-              </p>
+          <p className="mt-3 text-xs text-[#667085]">
+            Demo mode — live research will replace these placeholders with
+            verified information.
+          </p>
+        </section>
 
-              <p className="mt-2 rounded-xl bg-[#F7F5EF] p-4 text-sm leading-6 text-[#667085]">
-                {data.context}
-              </p>
-            </div>
-          )}
+        {/* Priorities */}
+        <section className="mt-12 rounded-3xl border border-[#E4E1D9] bg-white p-8 shadow-sm md:p-10">
+          <p className="text-xs font-bold tracking-[0.18em] text-[#244B74]">
+            03
+          </p>
 
-                </div>
-        <div className="mt-8 rounded-2xl border border-[#D9B56D] bg-white p-8 shadow-sm">
-  <p className="text-xs font-semibold tracking-[0.18em] text-[#244B74]">
-    VERDICT
-  </p>
+          <h2 className="mt-2 font-[family-name:var(--font-dm-serif)] text-3xl text-[#101828]">
+            What matters to you
+          </h2>
 
-  <h2 className="mt-3 font-[family-name:var(--font-dm-serif)] text-3xl text-[#101828]">
-    Your decision is being researched.
-  </h2>
+          <p className="mt-3 text-sm leading-6 text-[#667085]">
+            VERDICT used these priorities to frame the comparison.
+          </p>
 
-  <p className="mt-3 max-w-2xl text-sm leading-6 text-[#667085]">
-    VERDICT is analyzing your options against the priorities and context you provided.
-  </p>
-</div>
-        {research && (
-          <div className="mt-8 rounded-2xl border border-[#E4E1D9] bg-white p-8 shadow-sm">
-            <p className="text-xs font-semibold tracking-[0.18em] text-[#244B74]">
-              AI RESEARCH
+          <div className="mt-6 flex flex-wrap gap-3">
+            {data.priorities.map((priority) => (
+              <span
+                key={priority}
+                className="rounded-full border border-[#D9B56D] bg-[#FBF8F0] px-4 py-2 text-sm font-semibold text-[#244B74]"
+              >
+                {priority}
+              </span>
+            ))}
+          </div>
+        </section>
+
+        {/* Context */}
+        {data.context && (
+          <section className="mt-8 rounded-3xl border border-[#E4E1D9] bg-white p-8 shadow-sm md:p-10">
+            <p className="text-xs font-bold tracking-[0.18em] text-[#244B74]">
+              04
             </p>
 
-            <div className="mt-6 whitespace-pre-wrap font-[family-name:var(--font-manrope)] text-sm leading-7 text-[#344054]">
-              {research}
-            </div>
-          </div>
+            <h2 className="mt-2 font-[family-name:var(--font-dm-serif)] text-3xl text-[#101828]">
+              Your context
+            </h2>
+
+            <p className="mt-4 rounded-2xl bg-[#F7F5EF] p-5 text-sm leading-7 text-[#667085]">
+              {data.context}
+            </p>
+          </section>
         )}
+
+                {/* Research */}
+        {research && (
+          <section className="mt-8">
+            <div className="rounded-2xl border border-[#E4E1D9] bg-white px-6 py-5 shadow-sm">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-[10px] font-bold tracking-[0.18em] text-[#244B74]">
+                    05 · RESEARCH
+                  </p>
+
+                  <h2 className="mt-1 font-[family-name:var(--font-dm-serif)] text-xl text-[#101828]">
+                    Research summary
+                  </h2>
+                </div>
+
+                <span className="shrink-0 rounded-full bg-[#F7F5EF] px-3 py-1 text-[10px] font-bold tracking-wide text-[#667085]">
+                  DEMO MODE
+                </span>
+              </div>
+
+              <div className="mt-4 border-t border-[#E4E1D9] pt-4">
+                <p className="whitespace-pre-wrap text-xs leading-6 text-[#667085]">
+                  {research
+                    .replace(/^#{1,4}\s?/gm, "")
+                    .replace(/\*\*/g, "")}
+                </p>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Bottom */}
+        <div className="mt-12 border-t border-[#E4E1D9] pt-8 text-center">
+          <p className="font-[family-name:var(--font-dm-serif)] text-2xl text-[#101828]">
+            Research. Compare. Decide.
+          </p>
+
+          <p className="mt-2 text-sm text-[#667085]">
+            VERDICT helps you make decisions with more clarity.
+          </p>
+        </div>
 
       </div>
     </main>

@@ -1,9 +1,4 @@
-import OpenAI from "openai";
 import { NextResponse } from "next/server";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 export async function POST(request: Request) {
   try {
@@ -26,65 +21,98 @@ export async function POST(request: Request) {
       );
     }
 
-    const prompt = `
-You are the research engine for VERDICT, an AI-powered comparison platform.
+    const cleanOptions = options.map((option: string) => option.trim());
 
-The user wants to compare these options:
+    const cleanPriorities =
+      Array.isArray(priorities) && priorities.length > 0
+        ? priorities
+        : ["Overall value"];
 
-${options.map((option: string, index: number) => `${index + 1}. ${option}`).join("\n")}
+    const cleanContext =
+      typeof context === "string" && context.trim()
+        ? context.trim()
+        : "No additional context provided.";
 
-The user's priorities are:
+    const optionList = cleanOptions
+      .map(
+        (option: string, index: number) =>
+          `OPTION ${String(index + 1).padStart(2, "0")}\n${option}`
+      )
+      .join("\n\n");
 
-${priorities?.length
-  ? priorities.map((priority: string) => `- ${priority}`).join("\n")
-  : "- Overall value"}
+    const priorityList = cleanPriorities
+      .map((priority: string) => `• ${priority}`)
+      .join("\n");
 
-Additional user context:
+    const result = `
+EXECUTIVE SUMMARY
 
-${context?.trim() || "No additional context provided."}
+VERDICT has structured your comparison around the options, priorities, and context you provided.
 
-Your task:
+You are comparing:
 
-1. Research each option using current information from the web.
-2. Compare the options specifically according to the user's priorities and context.
-3. Prefer reliable and relevant sources.
-4. Do not invent facts, prices, specifications, reviews, or statistics.
-5. Clearly distinguish verified facts from estimates or subjective opinions.
-6. Consider important trade-offs rather than simply listing features.
-7. Give a clear final verdict explaining which option best fits the user's stated priorities.
-8. Mention important drawbacks of the recommended option.
-9. Include useful source links/citations wherever possible.
+${optionList}
 
-Structure your response with these sections:
+Your selected priorities are:
 
-## Executive summary
+${priorityList}
 
-## Comparison
 
-## What matters most for this user
+COMPARISON
 
-## Trade-offs
+${cleanOptions
+  .map(
+    (option: string, index: number) => `
+${option}
 
-## Verdict
+Position in this comparison: Option ${index + 1}
 
-## Sources
+This option will be evaluated against the same criteria as the other choices, with particular attention to your selected priorities.
+`
+  )
+  .join("\n")}
 
-Be concise but useful. The goal is to help the user make a well-informed decision.
+
+WHAT MATTERS MOST FOR YOU
+
+${priorityList}
+
+Your additional context:
+
+${cleanContext}
+
+
+TRADE-OFFS
+
+There is no universal winner in a personalized comparison.
+
+Different options can become more suitable depending on factors such as price, performance, features, long-term value, convenience, and the specific context you provided.
+
+The live research version of VERDICT will use current web information to identify these trade-offs using real evidence.
+
+
+VERDICT
+
+Your comparison framework is ready.
+
+The current version of VERDICT is using simulated research so you can test the complete product experience without consuming API credits.
+
+When live research is enabled, this section will contain:
+
+• A recommendation tailored to your priorities
+• Evidence supporting that recommendation
+• Important drawbacks and trade-offs
+• Current information gathered from the web
+• Source links for verification
+
+
+SOURCES
+
+Demo mode — live web sources will appear when the real research engine is connected.
 `;
 
-    const response = await openai.responses.create({
-  model: "gpt-5.6-luna",
-  tools: [
-    {
-      type: "web_search",
-    },
-  ],
-  input: prompt,
-  max_output_tokens: 2500,
-});
-
     return NextResponse.json({
-      result: response.output_text,
+      result,
     });
   } catch (error) {
     console.error("VERDICT research error:", error);
