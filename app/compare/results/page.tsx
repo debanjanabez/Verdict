@@ -55,7 +55,7 @@ export default function ResultsPage() {
           </p>
         </div>
 
-        {/* Verdict card */}
+                {/* Verdict card */}
         <section className="rounded-3xl border border-[#D9B56D] bg-white p-8 shadow-sm md:p-10">
           <div className="flex items-start justify-between gap-6">
             <div>
@@ -63,18 +63,33 @@ export default function ResultsPage() {
                 VERDICT
               </p>
 
-              <h2 className="mt-3 font-[family-name:var(--font-dm-serif)] text-3xl text-[#101828]">
-                Your options have been analyzed.
+              <h2 className="mt-3 font-[family-name:var(--font-dm-serif)] text-4xl leading-tight text-[#101828]">
+                {data.options[0]} is the stronger choice.
               </h2>
 
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-[#667085]">
-                This demo currently uses simulated research. Once the live
-                research engine is connected, this section will contain a
-                recommendation backed by current web research.
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-[#667085]">
+                Based on the priorities and context you provided, this option
+                is currently shown as the recommended choice.
+              </p>
+
+              <div className="mt-6 rounded-2xl bg-[#F7F5EF] p-5">
+                <p className="text-xs font-bold tracking-[0.16em] text-[#244B74]">
+                  WHY?
+                </p>
+
+                <p className="mt-2 text-sm leading-7 text-[#344054]">
+                  This demo verdict is based on your selected priorities:
+                  {data.priorities.join(", ")}.
+                </p>
+              </div>
+
+              <p className="mt-4 text-xs leading-5 text-[#98A2B3]">
+                Demo mode — the live research engine will determine the
+                recommendation using current web research and evidence.
               </p>
             </div>
 
-            <div className="hidden h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#F7F5EF] text-2xl md:flex">
+            <div className="hidden h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#F7F5EF] text-2xl text-[#244B74] md:flex">
               ✓
             </div>
           </div>
@@ -223,37 +238,6 @@ export default function ResultsPage() {
             <p className="mt-4 rounded-2xl bg-[#F7F5EF] p-5 text-sm leading-7 text-[#667085]">
               {data.context}
             </p>
-          </section>
-        )}
-
-                {/* Research */}
-        {research && (
-          <section className="mt-8">
-            <div className="rounded-2xl border border-[#E4E1D9] bg-white px-6 py-5 shadow-sm">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-[10px] font-bold tracking-[0.18em] text-[#244B74]">
-                    05 · RESEARCH
-                  </p>
-
-                  <h2 className="mt-1 font-[family-name:var(--font-dm-serif)] text-xl text-[#101828]">
-                    Research summary
-                  </h2>
-                </div>
-
-                <span className="shrink-0 rounded-full bg-[#F7F5EF] px-3 py-1 text-[10px] font-bold tracking-wide text-[#667085]">
-                  DEMO MODE
-                </span>
-              </div>
-
-              <div className="mt-4 border-t border-[#E4E1D9] pt-4">
-                <p className="whitespace-pre-wrap text-xs leading-6 text-[#667085]">
-                  {research
-                    .replace(/^#{1,4}\s?/gm, "")
-                    .replace(/\*\*/g, "")}
-                </p>
-              </div>
-            </div>
           </section>
         )}
 
