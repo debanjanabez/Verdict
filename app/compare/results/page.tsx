@@ -241,8 +241,8 @@ export default function ResultsPage() {
           </section>
         )}
 
-        {/* Bottom */}
-        <div className="mt-12 border-t border-[#E4E1D9] pt-8 text-center">
+                {/* Bottom */}
+        <div className="mt-12 border-t border-[#E4E1D9] pt-10 text-center">
           <p className="font-[family-name:var(--font-dm-serif)] text-2xl text-[#101828]">
             Research. Compare. Decide.
           </p>
@@ -250,9 +250,17 @@ export default function ResultsPage() {
           <p className="mt-2 text-sm text-[#667085]">
             VERDICT helps you make decisions with more clarity.
           </p>
-        </div>
 
-      </div>
+          <button
+            onClick={() => {
+              window.location.href = "/compare";
+            }}
+            className="mt-6 rounded-full bg-[#244B74] px-7 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#193653]"
+          >
+            ← Start a new comparison
+          </button>
+        </div>
+        </div>
     </main>
   );
 }
