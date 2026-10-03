@@ -1,11 +1,18 @@
 import { NextResponse } from "next/server";
 
+type ComparisonCell = {
+  option: string;
+  priority: string;
+  analysis: string;
+};
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
 
     const { options, priorities, context } = body;
 
+    // Validate options
     if (
       !Array.isArray(options) ||
       options.length < 2 ||
@@ -21,11 +28,15 @@ export async function POST(request: Request) {
       );
     }
 
+    // Clean incoming data
     const cleanOptions = options.map((option: string) => option.trim());
 
     const cleanPriorities =
       Array.isArray(priorities) && priorities.length > 0
         ? priorities
+            .filter((priority: unknown) => typeof priority === "string")
+            .map((priority: string) => priority.trim())
+            .filter(Boolean)
         : ["Overall value"];
 
     const cleanContext =
@@ -33,86 +44,43 @@ export async function POST(request: Request) {
         ? context.trim()
         : "No additional context provided.";
 
-    const optionList = cleanOptions
-      .map(
-        (option: string, index: number) =>
-          `OPTION ${String(index + 1).padStart(2, "0")}\n${option}`
-      )
-      .join("\n\n");
+    // Create structured comparison cells.
+    // These are placeholders until live research is connected.
+    const comparison: ComparisonCell[] = [];
 
-    const priorityList = cleanPriorities
-      .map((priority: string) => `• ${priority}`)
-      .join("\n");
+    for (const priority of cleanPriorities) {
+      for (const option of cleanOptions) {
+        comparison.push({
+          option,
+          priority,
+          analysis: "Awaiting research",
+        });
+      }
+    }
 
-    const result = `
-EXECUTIVE SUMMARY
+    // Demo recommendation.
+    // The live research engine will determine this later.
+    const recommendation = cleanOptions[0];
 
-VERDICT has structured your comparison around the options, priorities, and context you provided.
-
-You are comparing:
-
-${optionList}
-
-Your selected priorities are:
-
-${priorityList}
-
-
-COMPARISON
-
-${cleanOptions
-  .map(
-    (option: string, index: number) => `
-${option}
-
-Position in this comparison: Option ${index + 1}
-
-This option will be evaluated against the same criteria as the other choices, with particular attention to your selected priorities.
-`
-  )
-  .join("\n")}
-
-
-WHAT MATTERS MOST FOR YOU
-
-${priorityList}
-
-Your additional context:
-
-${cleanContext}
-
-
-TRADE-OFFS
-
-There is no universal winner in a personalized comparison.
-
-Different options can become more suitable depending on factors such as price, performance, features, long-term value, convenience, and the specific context you provided.
-
-The live research version of VERDICT will use current web information to identify these trade-offs using real evidence.
-
-
-VERDICT
-
-Your comparison framework is ready.
-
-The current version of VERDICT is using simulated research so you can test the complete product experience without consuming API credits.
-
-When live research is enabled, this section will contain:
-
-• A recommendation tailored to your priorities
-• Evidence supporting that recommendation
-• Important drawbacks and trade-offs
-• Current information gathered from the web
-• Source links for verification
-
-
-SOURCES
-
-Demo mode — live web sources will appear when the real research engine is connected.
-`;
+    const result = {
+      mode: "demo",
+      recommendation,
+      recommendationReason:
+        "This is a placeholder recommendation. Live research will determine the recommendation using current information and your selected priorities.",
+      options: cleanOptions,
+      priorities: cleanPriorities,
+      context: cleanContext,
+      comparison,
+      tradeoffs: [
+        "Different options may perform differently depending on your priorities.",
+        "Price, performance, features, durability, and long-term value may involve trade-offs.",
+        "The live research engine will identify these trade-offs using current evidence.",
+      ],
+      sources: [],
+    };
 
     return NextResponse.json({
-      result,
+      result: JSON.stringify(result),
     });
   } catch (error) {
     console.error("VERDICT research error:", error);

@@ -2,6 +2,24 @@
 
 import { useEffect, useState } from "react";
 
+type ComparisonCell = {
+  option: string;
+  priority: string;
+  analysis: string;
+};
+
+type ResearchResult = {
+  mode: string;
+  recommendation: string;
+  recommendationReason: string;
+  options: string[];
+  priorities: string[];
+  context: string;
+  comparison: ComparisonCell[];
+  tradeoffs: string[];
+  sources: string[];
+};
+
 type ComparisonData = {
   options: string[];
   priorities: string[];
@@ -10,7 +28,7 @@ type ComparisonData = {
 
 export default function ResultsPage() {
   const [data, setData] = useState<ComparisonData | null>(null);
-  const [research, setResearch] = useState("");
+  const [research, setResearch] = useState<ResearchResult | null>(null);
 
   useEffect(() => {
     const savedData = sessionStorage.getItem("verdictComparison");
@@ -21,8 +39,8 @@ export default function ResultsPage() {
     }
 
     if (savedResearch) {
-      setResearch(savedResearch);
-    }
+  setResearch(JSON.parse(savedResearch));
+}
   }, []);
 
   if (!data) {
@@ -180,14 +198,22 @@ export default function ResultsPage() {
                   {priority}
                 </p>
 
-                {data.options.map((option, index) => (
-                  <p
-                    key={`${priority}-${index}`}
-                    className="text-sm leading-6 text-[#667085]"
-                  >
-                    Demo analysis
-                  </p>
-                ))}
+                {data.options.map((option, index) => {
+  const cell = research?.comparison.find(
+    (item) =>
+      item.option === option &&
+      item.priority === priority
+  );
+
+  return (
+    <p
+      key={`${priority}-${index}`}
+      className="text-sm leading-6 text-[#667085]"
+    >
+      {cell?.analysis || "Awaiting research"}
+    </p>
+  );
+})}
               </div>
             ))}
           </div>
