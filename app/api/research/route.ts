@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
+import OpenAI from "openai";
 
-type ComparisonCell = {
-  option: string;
-  priority: string;
-  analysis: string;
-};
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 export async function POST(request: Request) {
   try {
@@ -12,7 +11,6 @@ export async function POST(request: Request) {
 
     const { options, priorities, context } = body;
 
-    // Validate options
     if (
       !Array.isArray(options) ||
       options.length < 2 ||
@@ -28,7 +26,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Clean incoming data
     const cleanOptions = options.map((option: string) => option.trim());
 
     const cleanPriorities =
@@ -44,40 +41,83 @@ export async function POST(request: Request) {
         ? context.trim()
         : "No additional context provided.";
 
-    // Create structured comparison cells.
-    // These are placeholders until live research is connected.
-    const comparison: ComparisonCell[] = [];
+    const prompt = `
+You are VERDICT, an AI comparison and decision-making engine.
 
-    for (const priority of cleanPriorities) {
-      for (const option of cleanOptions) {
-        comparison.push({
-          option,
-          priority,
-          analysis: "Awaiting research",
-        });
-      }
+Compare these options:
+
+${cleanOptions.map((option, i) => `${i + 1}. ${option}`).join("\n")}
+
+The user's priorities are:
+
+${cleanPriorities.map((priority) => `- ${priority}`).join("\n")}
+
+Additional context from the user:
+${cleanContext}
+
+Research the options using current web information.
+
+Your job is to:
+1. Determine which option is the best overall choice for THIS user.
+2. Explain why that option wins.
+3. Compare every option against every priority.
+4. Identify important trade-offs.
+5. Provide the most useful sources used for the comparison.
+
+Return ONLY valid JSON in exactly this structure:
+
+{
+  "mode": "live",
+  "recommendation": "winning option",
+  "recommendationReason": "clear explanation of why it wins",
+  "options": ["option 1", "option 2"],
+  "priorities": ["priority 1", "priority 2"],
+  "context": "user context",
+  "comparison": [
+    {
+      "option": "option 1",
+      "priority": "priority 1",
+      "analysis": "specific researched analysis"
     }
+  ],
+  "tradeoffs": [
+    "important trade-off 1",
+    "important trade-off 2"
+  ],
+  "sources": [
+    "https://example.com/source"
+  ]
+}
 
-    // Demo recommendation.
-    // The live research engine will determine this later.
-    const recommendation = cleanOptions[0];
+Important:
+- Do not invent facts.
+- Prefer recent and authoritative sources.
+- Be concise but useful.
+- Every option must be represented for every priority.
+`;
 
-    const result = {
-      mode: "demo",
-      recommendation,
-      recommendationReason:
-        "This is a placeholder recommendation. Live research will determine the recommendation using current information and your selected priorities.",
-      options: cleanOptions,
-      priorities: cleanPriorities,
-      context: cleanContext,
-      comparison,
-      tradeoffs: [
-        "Different options may perform differently depending on your priorities.",
-        "Price, performance, features, durability, and long-term value may involve trade-offs.",
-        "The live research engine will identify these trade-offs using current evidence.",
-      ],
-      sources: [],
-    };
+    const response = await openai.responses.create({
+      model: "gpt-6-luna",
+      tools: [{ type: "web_search" }],
+      input: prompt,
+    });
+
+    const text = response.output_text;
+
+    let result;
+
+    try {
+      result = JSON.parse(text);
+    } catch {
+      console.error("Invalid JSON from research model:", text);
+
+      return NextResponse.json(
+        {
+          error: "The research engine returned an invalid result.",
+        },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       result: JSON.stringify(result),
@@ -87,7 +127,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       {
-        error: "Something went wrong while researching your comparison.",
+        error:
+          "Research could not be completed. Please check your API credits and try again.",
       },
       { status: 500 }
     );

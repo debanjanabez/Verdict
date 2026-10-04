@@ -95,15 +95,10 @@ export default function ResultsPage() {
                 </p>
 
                 <p className="mt-2 text-sm leading-7 text-[#344054]">
-                  This demo verdict is based on your selected priorities:
-                  {data.priorities.join(", ")}.
+                  {research?.recommendationReason ||
+                    `This recommendation is based on your selected priorities: ${data.priorities.join(", ")}.`}
                 </p>
               </div>
-
-              <p className="mt-4 text-xs leading-5 text-[#98A2B3]">
-                Demo mode — the live research engine will determine the
-                recommendation using current web research and evidence.
-              </p>
             </div>
 
             <div className="hidden h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#F7F5EF] text-2xl text-[#244B74] md:flex">
@@ -138,9 +133,26 @@ export default function ResultsPage() {
                   {option}
                 </h3>
 
-                <p className="mt-3 text-sm leading-6 text-[#667085]">
-                  Evaluated against your selected priorities and context.
-                </p>
+                <div className="mt-4 space-y-2">
+                  {data.priorities.map((priority) => {
+                    const cell = research?.comparison.find(
+                      (item) =>
+                        item.option === option &&
+                        item.priority === priority
+                    );
+
+                    return (
+                      <div key={priority}>
+                        <p className="text-xs font-bold text-[#244B74]">
+                          {priority}
+                        </p>
+                        <p className="mt-1 text-sm leading-6 text-[#667085]">
+                          {cell?.analysis || "Awaiting research"}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             ))}
           </div>
