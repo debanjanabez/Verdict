@@ -82,14 +82,13 @@ export default function ResultsPage() {
               </p>
 
               <h2 className="mt-3 font-[family-name:var(--font-dm-serif)] text-4xl leading-tight text-[#101828]">
-                {data.options[0]} is the stronger choice.
+                {research?.recommendation || data.options[0]} is the stronger choice.
               </h2>
 
               <p className="mt-4 max-w-2xl text-sm leading-7 text-[#667085]">
-                Based on the priorities and context you provided, this option
-                is currently shown as the recommended choice.
+                {research?.recommendationReason ||
+                 "Based on the priorities and context you provided, this option is currently shown as the recommended choice."}
               </p>
-
               <div className="mt-6 rounded-2xl bg-[#F7F5EF] p-5">
                 <p className="text-xs font-bold tracking-[0.16em] text-[#244B74]">
                   WHY?
