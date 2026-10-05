@@ -5,12 +5,19 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+type ComparisonCell = {
+  option: string;
+  priority: string;
+  analysis: string;
+};
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
 
     const { options, priorities, context } = body;
 
+    // Validate options
     if (
       !Array.isArray(options) ||
       options.length < 2 ||
@@ -41,7 +48,9 @@ export async function POST(request: Request) {
         ? context.trim()
         : "No additional context provided.";
 
-    const prompt = `
+    // Try live AI research first
+    try {
+      const prompt = `
 You are VERDICT, an AI comparison and decision-making engine.
 
 Compare these options:
@@ -52,83 +61,101 @@ The user's priorities are:
 
 ${cleanPriorities.map((priority) => `- ${priority}`).join("\n")}
 
-Additional context from the user:
+Additional context:
 ${cleanContext}
 
 Research the options using current web information.
 
-Your job is to:
-1. Determine which option is the best overall choice for THIS user.
-2. Explain why that option wins.
-3. Compare every option against every priority.
-4. Identify important trade-offs.
-5. Provide the most useful sources used for the comparison.
+Determine:
+1. The best option for this user.
+2. Why it wins.
+3. How every option performs against every priority.
+4. Important trade-offs.
+5. Useful sources.
 
 Return ONLY valid JSON in exactly this structure:
 
 {
   "mode": "live",
   "recommendation": "winning option",
-  "recommendationReason": "clear explanation of why it wins",
-  "options": ["option 1", "option 2"],
-  "priorities": ["priority 1", "priority 2"],
-  "context": "user context",
+  "recommendationReason": "clear explanation",
+  "options": [],
+  "priorities": [],
+  "context": "",
   "comparison": [
     {
-      "option": "option 1",
-      "priority": "priority 1",
-      "analysis": "specific researched analysis"
+      "option": "",
+      "priority": "",
+      "analysis": ""
     }
   ],
-  "tradeoffs": [
-    "important trade-off 1",
-    "important trade-off 2"
-  ],
-  "sources": [
-    "https://example.com/source"
-  ]
+  "tradeoffs": [],
+  "sources": []
 }
 
 Important:
 - Do not invent facts.
 - Prefer recent and authoritative sources.
-- Be concise but useful.
 - Every option must be represented for every priority.
 `;
 
-    const response = await openai.responses.create({
-      model: "gpt-6-luna",
-      tools: [{ type: "web_search" }],
-      input: prompt,
-    });
+      const response = await openai.responses.create({
+        model: "gpt-6-luna",
+        tools: [{ type: "web_search" }],
+        input: prompt,
+      });
 
-    const text = response.output_text;
+      const text = response.output_text;
 
-    let result;
+      const result = JSON.parse(text);
 
-    try {
-      result = JSON.parse(text);
-    } catch {
-      console.error("Invalid JSON from research model:", text);
+      return NextResponse.json({
+        result: JSON.stringify(result),
+      });
+    } catch (apiError) {
+      // API failed — use development fallback
+      console.error("Live research unavailable:", apiError);
 
-      return NextResponse.json(
-        {
-          error: "The research engine returned an invalid result.",
-        },
-        { status: 500 }
-      );
+      const comparison: ComparisonCell[] = [];
+
+      for (const priority of cleanPriorities) {
+        for (const option of cleanOptions) {
+          comparison.push({
+            option,
+            priority,
+            analysis:
+              "Live web research is currently unavailable. This comparison will be updated when the research engine is available.",
+          });
+        }
+      }
+
+      const fallbackResult = {
+        mode: "fallback",
+        recommendation: cleanOptions[0],
+        recommendationReason:
+          "Live AI research is currently unavailable, so VERDICT is showing a temporary development result. The recommendation will be recalculated using web research when the research engine is available.",
+        options: cleanOptions,
+        priorities: cleanPriorities,
+        context: cleanContext,
+        comparison,
+        tradeoffs: [
+          "A live comparison requires current web research.",
+          "The options may differ significantly depending on your priorities.",
+          "This temporary result should not be treated as a researched recommendation.",
+        ],
+        sources: [],
+      };
+
+      return NextResponse.json({
+        result: JSON.stringify(fallbackResult),
+      });
     }
-
-    return NextResponse.json({
-      result: JSON.stringify(result),
-    });
   } catch (error) {
     console.error("VERDICT research error:", error);
 
     return NextResponse.json(
       {
-        error:
-          "Research could not be completed. Please check your API credits and try again.",
+        error: "Something went wrong while processing your comparison.",
       },
       { status: 500 }
     );

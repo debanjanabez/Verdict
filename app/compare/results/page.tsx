@@ -277,6 +277,40 @@ export default function ResultsPage() {
             </p>
           </section>
         )}
+        {/* Sources */}
+          {research?.sources && research.sources.length > 0 && (
+            <section className="mt-8 rounded-3xl border border-[#E4E1D9] bg-white p-8 shadow-sm md:p-10">
+              <p className="text-xs font-bold tracking-[0.18em] text-[#244B74]">
+                05
+              </p>
+
+              <h2 className="mt-2 font-[family-name:var(--font-dm-serif)] text-3xl text-[#101828]">
+                Sources & evidence
+              </h2>
+
+              <p className="mt-3 text-sm leading-6 text-[#667085]">
+                VERDICT used these sources while researching your comparison.
+              </p>
+
+              <div className="mt-6 space-y-3">
+                {research.sources.map((source, index) => (
+                  <a
+                    key={index}
+                    href={source}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block rounded-2xl border border-[#E4E1D9] bg-[#F7F5EF] p-4 text-sm font-medium text-[#244B74] transition hover:border-[#D9B56D] hover:bg-[#FBF8F0]"
+                  >
+                    <span className="mr-3 text-xs font-bold text-[#98A2B3]">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+
+                    {source}
+                  </a>
+                ))}
+              </div>
+            </section>
+          )}
 
                 {/* Bottom */}
         <div className="mt-12 border-t border-[#E4E1D9] pt-10 text-center">
