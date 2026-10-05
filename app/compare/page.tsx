@@ -342,7 +342,7 @@ const addCustomPriority = () => {
         )}
       </section>
       {/* Step 03 */}
-      <section className="mt-12">
+        <section className="mx-auto mt-12 max-w-4xl px-6 pb-24">
         <div className="mb-6">
           <p className="text-sm font-semibold tracking-[0.18em] text-[#244B74]">
             STEP 03

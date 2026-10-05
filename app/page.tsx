@@ -1,3 +1,4 @@
+import Link from "next/link";
 export default function Home() {
   return (
     <main className="min-h-screen bg-[#F7F5EF] text-[#101828]">
@@ -210,9 +211,12 @@ export default function Home() {
           deserves a verdict.
         </h2>
 
-        <button className="mt-10 rounded-full bg-[#F7F5EF] px-8 py-4 font-[family-name:var(--font-manrope)] text-sm font-bold text-[#244B74] transition hover:bg-white">
+        <Link
+          href="/compare"
+          className="inline-block rounded-full bg-[#F7F5EF] px-8 py-4 font-[family-name:var(--font-manrope)] text-sm font-bold text-[#244B74] shadow-sm transition hover:scale-[1.02]"
+        >
           Start researching →
-        </button>
+        </Link>
       </section>
 
       {/* Footer */}
