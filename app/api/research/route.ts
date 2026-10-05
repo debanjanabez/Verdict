@@ -106,42 +106,167 @@ Important:
       });
 
       const text = response.output_text;
-
       const result = JSON.parse(text);
 
       return NextResponse.json({
         result: JSON.stringify(result),
       });
     } catch (apiError) {
-      // API failed — use development fallback
+      // Live API unavailable — use development fallback
       console.error("Live research unavailable:", apiError);
 
+      const priorityScores: Record<string, number[]> = {};
+
+      for (const priority of cleanPriorities) {
+        const normalized = priority.toLowerCase();
+
+        priorityScores[priority] = cleanOptions.map((option, index) => {
+          const text = option.toLowerCase();
+
+          let score = 50;
+
+          if (normalized.includes("price")) {
+            if (
+              text.includes("budget") ||
+              text.includes("cheap") ||
+              text.includes("affordable") ||
+              text.includes("value")
+            ) {
+              score += 15;
+            }
+
+            score -= index * 2;
+          }
+
+          if (normalized.includes("performance")) {
+            if (
+              text.includes("pro") ||
+              text.includes("ultra") ||
+              text.includes("max") ||
+              text.includes("performance")
+            ) {
+              score += 15;
+            }
+          }
+
+          if (normalized.includes("battery")) {
+            if (
+              text.includes("ultra") ||
+              text.includes("max") ||
+              text.includes("battery")
+            ) {
+              score += 15;
+            }
+          }
+
+          if (normalized.includes("quality")) {
+            if (
+              text.includes("pro") ||
+              text.includes("premium") ||
+              text.includes("plus") ||
+              text.includes("ultra")
+            ) {
+              score += 15;
+            }
+          }
+
+          if (normalized.includes("features")) {
+            if (
+              text.includes("pro") ||
+              text.includes("plus") ||
+              text.includes("ultra") ||
+              text.includes("max")
+            ) {
+              score += 15;
+            }
+          }
+
+          if (normalized.includes("portability")) {
+            if (
+              text.includes("mini") ||
+              text.includes("air") ||
+              text.includes("lite") ||
+              text.includes("compact")
+            ) {
+              score += 15;
+            }
+          }
+
+          if (normalized.includes("durability")) {
+            if (
+              text.includes("pro") ||
+              text.includes("ultra") ||
+              text.includes("rugged")
+            ) {
+              score += 15;
+            }
+          }
+
+          if (normalized.includes("reviews")) {
+            if (
+              text.includes("pro") ||
+              text.includes("premium") ||
+              text.includes("popular")
+            ) {
+              score += 10;
+            }
+          }
+
+          return Math.max(0, Math.min(100, score));
+        });
+      }
+
+      // Calculate overall score
+      const overallScores = cleanOptions.map((option, index) => {
+        const scores = cleanPriorities.map(
+          (priority) => priorityScores[priority][index]
+        );
+
+        const total =
+          scores.reduce((sum, score) => sum + score, 0) / scores.length;
+
+        return {
+          option,
+          score: total,
+        };
+      });
+
+      overallScores.sort((a, b) => b.score - a.score);
+
+      const fallbackWinner = overallScores[0].option;
+
+      // Build comparison data
       const comparison: ComparisonCell[] = [];
 
       for (const priority of cleanPriorities) {
-        for (const option of cleanOptions) {
+        const scores = priorityScores[priority];
+
+        cleanOptions.forEach((option, index) => {
           comparison.push({
             option,
             priority,
             analysis:
-              "Live web research is currently unavailable. This comparison will be updated when the research engine is available.",
+              `${option} receives a development score of ${scores[index]}/100 for ${priority}. ` +
+              `This is a temporary heuristic and not live web research.`,
           });
-        }
+        });
       }
 
       const fallbackResult = {
         mode: "fallback",
-        recommendation: cleanOptions[0],
+        recommendation: fallbackWinner,
         recommendationReason:
-          "Live AI research is currently unavailable, so VERDICT is showing a temporary development result. The recommendation will be recalculated using web research when the research engine is available.",
+          `${fallbackWinner} currently ranks highest based on your selected priorities: ` +
+          `${cleanPriorities.join(", ")}. ` +
+          `This is a development fallback because live web research is unavailable.`,
         options: cleanOptions,
         priorities: cleanPriorities,
         context: cleanContext,
         comparison,
         tradeoffs: [
-          "A live comparison requires current web research.",
-          "The options may differ significantly depending on your priorities.",
-          "This temporary result should not be treated as a researched recommendation.",
+          "This result uses simple development heuristics rather than live research.",
+          "Changing your priorities can change the recommended option.",
+          "A live research result will replace this fallback when the research engine is available.",
         ],
         sources: [],
       };
