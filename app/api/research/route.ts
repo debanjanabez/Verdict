@@ -8,9 +8,9 @@ const openai = new OpenAI({
 type ComparisonCell = {
   option: string;
   priority: string;
+  score: number;
   analysis: string;
 };
-
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -48,7 +48,10 @@ export async function POST(request: Request) {
         ? context.trim()
         : "No additional context provided.";
 
-    // Try live AI research first
+    // ============================================================
+    // LIVE AI RESEARCH
+    // ============================================================
+
     try {
       const prompt = `
 You are VERDICT, an AI comparison and decision-making engine.
@@ -64,39 +67,51 @@ ${cleanPriorities.map((priority) => `- ${priority}`).join("\n")}
 Additional context:
 ${cleanContext}
 
-Research the options using current web information.
+Use web research to investigate the options.
 
-Determine:
-1. The best option for this user.
-2. Why it wins.
-3. How every option performs against every priority.
-4. Important trade-offs.
-5. Useful sources.
+Your job is to:
+
+1. Determine which option is the best overall choice for THIS user.
+2. Explain clearly why it wins.
+3. Compare EVERY option against EVERY priority.
+4. Identify important trade-offs.
+5. Use current, relevant and authoritative information.
+6. Base factual claims on information found through web research.
+7. For every option and every priority, provide:
+- a score from 0 to 100
+- a concise explanation of the score
+
+The score must reflect how well that option satisfies that specific priority.
+Do not give every option the same score.
 
 Return ONLY valid JSON in exactly this structure:
 
 {
   "mode": "live",
   "recommendation": "winning option",
-  "recommendationReason": "clear explanation",
+  "recommendationReason": "clear explanation of why it wins",
   "options": [],
   "priorities": [],
   "context": "",
   "comparison": [
     {
-      "option": "",
-      "priority": "",
-      "analysis": ""
-    }
+  "option": "",
+  "priority": "",
+  "score": 0,
+  "analysis": ""
+}
   ],
-  "tradeoffs": [],
-  "sources": []
+  "tradeoffs": []
 }
 
 Important:
 - Do not invent facts.
-- Prefer recent and authoritative sources.
+- Prefer official websites, documentation, reputable publications and reliable review sources.
+- Prefer recent information when the information can change over time.
 - Every option must be represented for every priority.
+- Keep each comparison analysis concise but specific.
+- Do NOT generate or guess source URLs.
+- Actual web-search citations will be attached separately by VERDICT.
 `;
 
       const response = await openai.responses.create({
@@ -106,13 +121,50 @@ Important:
       });
 
       const text = response.output_text;
+
       const result = JSON.parse(text);
+
+      // ============================================================
+      // EXTRACT ACTUAL WEB-SEARCH CITATIONS
+      // ============================================================
+
+      const sources: string[] = [];
+
+      for (const outputItem of response.output) {
+        if (!("content" in outputItem) || !outputItem.content) {
+          continue;
+        }
+
+        for (const contentItem of outputItem.content) {
+          if (!("annotations" in contentItem) || !contentItem.annotations) {
+            continue;
+          }
+
+          for (const annotation of contentItem.annotations) {
+            if (
+              "url" in annotation &&
+              typeof annotation.url === "string" &&
+              annotation.url.startsWith("http")
+            ) {
+              if (!sources.includes(annotation.url)) {
+                sources.push(annotation.url);
+              }
+            }
+          }
+        }
+      }
+
+      // Attach actual URLs extracted from the web-search response.
+      result.sources = sources;
 
       return NextResponse.json({
         result: JSON.stringify(result),
       });
     } catch (apiError) {
-      // Live API unavailable — use development fallback
+      // ============================================================
+      // FALLBACK MODE
+      // ============================================================
+
       console.error("Live research unavailable:", apiError);
 
       const priorityScores: Record<string, number[]> = {};
@@ -243,12 +295,13 @@ Important:
 
         cleanOptions.forEach((option, index) => {
           comparison.push({
-            option,
-            priority,
-            analysis:
-              `${option} receives a development score of ${scores[index]}/100 for ${priority}. ` +
-              `This is a temporary heuristic and not live web research.`,
-          });
+  option,
+  priority,
+  score: scores[index],
+  analysis:
+    `${option} receives a development score of ${scores[index]}/100 for ${priority}. ` +
+    `This is a temporary heuristic and not live web research.`,
+});
         });
       }
 
