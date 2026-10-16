@@ -27,22 +27,77 @@ type ComparisonData = {
   context: string;
 };
 
+type HistoryEntry = {
+  id: string;
+  savedAt: string;
+  fingerprint: string;
+  data: ComparisonData;
+  research: ResearchResult;
+};
+
 export default function ResultsPage() {
   const [data, setData] = useState<ComparisonData | null>(null);
   const [research, setResearch] = useState<ResearchResult | null>(null);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
 
   useEffect(() => {
-    const savedData = sessionStorage.getItem("verdictComparison");
-    const savedResearch = sessionStorage.getItem("verdictResearch");
+    try {
+      const savedData = sessionStorage.getItem("verdictComparison");
+      const savedResearch = sessionStorage.getItem("verdictResearch");
+      const parsedData = savedData ? (JSON.parse(savedData) as ComparisonData) : null;
+      const parsedResearch = savedResearch
+        ? (JSON.parse(savedResearch) as ResearchResult)
+        : null;
 
-    if (savedData) {
-      setData(JSON.parse(savedData));
-    }
+      if (parsedData) setData(parsedData);
+      if (parsedResearch) setResearch(parsedResearch);
 
-    if (savedResearch) {
-      setResearch(JSON.parse(savedResearch));
+      const savedHistory = localStorage.getItem("verdictHistory");
+      const parsedHistory: HistoryEntry[] = savedHistory
+        ? (JSON.parse(savedHistory) as HistoryEntry[])
+        : [];
+
+      if (parsedData && parsedResearch) {
+        const fingerprint = JSON.stringify([parsedData, parsedResearch]);
+        const existingEntry = parsedHistory.find(
+          (entry) => entry.fingerprint === fingerprint
+        );
+
+        if (!existingEntry) {
+          const newEntry: HistoryEntry = {
+            id: fingerprint,
+            fingerprint,
+            savedAt: new Date().toISOString(),
+            data: parsedData,
+            research: parsedResearch,
+          };
+          const updatedHistory = [newEntry, ...parsedHistory].slice(0, 10);
+          localStorage.setItem("verdictHistory", JSON.stringify(updatedHistory));
+          setHistory(updatedHistory);
+        } else {
+          setHistory(parsedHistory);
+        }
+      } else {
+        setHistory(parsedHistory);
+      }
+    } catch (error) {
+      console.error("Could not load VERDICT history:", error);
+      setHistory([]);
     }
   }, []);
+
+  const reopenComparison = (entry: HistoryEntry) => {
+    sessionStorage.setItem("verdictComparison", JSON.stringify(entry.data));
+    sessionStorage.setItem("verdictResearch", JSON.stringify(entry.research));
+    setData(entry.data);
+    setResearch(entry.research);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const clearHistory = () => {
+    localStorage.removeItem("verdictHistory");
+    setHistory([]);
+  };
 
   if (!data) {
     return (
@@ -102,6 +157,57 @@ export default function ResultsPage() {
             context you provided.
           </p>
         </div>
+
+        {/* Comparison history */}
+        {history.length > 0 && (
+          <section className="mb-10 rounded-3xl border border-[#E4E1D9] bg-white p-6 shadow-sm md:p-8">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-bold tracking-[0.18em] text-[#244B74]">
+                  YOUR SAVED DECISIONS
+                </p>
+                <h2 className="mt-2 font-[family-name:var(--font-dm-serif)] text-2xl text-[#101828]">
+                  Comparison history
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-[#667085]">
+                  Your latest {history.length} completed comparison{history.length === 1 ? "" : "s"}, saved in this browser.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={clearHistory}
+                className="rounded-full border border-[#E4E1D9] px-4 py-2 text-xs font-bold text-[#667085] transition hover:border-red-200 hover:text-red-600"
+              >
+                Clear history
+              </button>
+            </div>
+
+            <div className="mt-5 space-y-3">
+              {history.map((entry) => (
+                <div
+                  key={entry.id}
+                  className="flex flex-col justify-between gap-3 rounded-2xl border border-[#E4E1D9] bg-[#F7F5EF] p-4 sm:flex-row sm:items-center"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-bold text-[#101828]">
+                      {entry.data.options.join(" vs ")}
+                    </p>
+                    <p className="mt-1 text-xs text-[#667085]">
+                      {new Date(entry.savedAt).toLocaleDateString()} · {entry.data.priorities.length} priorities · Winner: {entry.research.recommendation}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => reopenComparison(entry)}
+                    className="shrink-0 rounded-full bg-[#244B74] px-4 py-2 text-xs font-bold text-white transition hover:bg-[#193653]"
+                  >
+                    View comparison
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Verdict */}
         <section className="rounded-3xl border border-[#D9B56D] bg-white p-8 shadow-sm md:p-10">
