@@ -46,22 +46,6 @@ export default function Home() {
             fits you best.
           </p>
 
-          {/* Decision input */}
-          <div className="mt-10 flex max-w-xl items-center rounded-2xl border border-[#D9D6CE] bg-white p-2 shadow-[0_15px_40px_rgba(16,24,40,0.06)]">
-            <input
-              type="text"
-              placeholder="What are you trying to decide?"
-              className="min-w-0 flex-1 bg-transparent px-4 py-4 font-[family-name:var(--font-manrope)] text-sm text-[#101828] outline-none placeholder:text-[#98A2B3]"
-            />
-
-            <button className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#244B74] text-xl text-white transition hover:bg-[#193653]">
-              →
-            </button>
-          </div>
-
-          <p className="mt-4 font-[family-name:var(--font-manrope)] text-xs text-[#98A2B3]">
-            e.g. Which laptop should I buy for college and ML under ₹80,000?
-          </p>
         </div>
 
         {/* Research preview */}
@@ -236,3 +220,5 @@ export default function Home() {
     </main>
   );
 }
+
+
