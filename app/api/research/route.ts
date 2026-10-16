@@ -123,6 +123,73 @@ Important:
       const text = response.output_text;
 
       const result = JSON.parse(text);
+      
+      // Validate the AI response before using its scores.
+      if (
+        !result ||
+        !Array.isArray(result.comparison) ||
+        !Array.isArray(result.options) ||
+        !Array.isArray(result.priorities)
+      ) {
+        throw new Error("Invalid research response structure");
+      }
+
+      // Require exactly one valid score for each option-priority pair.
+      const expectedCount =
+        cleanOptions.length * cleanPriorities.length;
+
+      if (result.comparison.length !== expectedCount) {
+        throw new Error("Research response has missing comparisons");
+      }
+
+      const seenPairs = new Set<string>();
+
+      for (const cell of result.comparison) {
+        if (
+          !cell ||
+          typeof cell.option !== "string" ||
+          typeof cell.priority !== "string" ||
+          typeof cell.score !== "number" ||
+          !Number.isFinite(cell.score) ||
+          cell.score < 0 ||
+          cell.score > 100 ||
+          typeof cell.analysis !== "string" ||
+          !cleanOptions.includes(cell.option) ||
+          !cleanPriorities.includes(cell.priority)
+        ) {
+          throw new Error("Research response contains invalid scores");
+        }
+
+        const pair = JSON.stringify([cell.option, cell.priority]);
+
+        if (seenPairs.has(pair)) {
+          throw new Error("Research response contains duplicate comparisons");
+        }
+
+        seenPairs.add(pair);
+        cell.score = Math.round(cell.score);
+      }
+
+      // Keep the recommendation consistent with the scores.
+      const totals = cleanOptions.map((option) => {
+        const cells = result.comparison.filter(
+          (cell: ComparisonCell) => cell.option === option
+        );
+
+        return {
+          option,
+          score:
+            cells.reduce(
+              (sum: number, cell: ComparisonCell) => sum + cell.score,
+              0
+            ) / cleanPriorities.length,
+        };
+      });
+
+      totals.sort((a, b) => b.score - a.score);
+
+      result.recommendation = totals[0].option;
+
 
       // ============================================================
       // EXTRACT ACTUAL WEB-SEARCH CITATIONS
